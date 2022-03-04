@@ -35,10 +35,10 @@ class ApiDevMan:
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 continue
 
-            jsonify_response = json.loads(long_polling_response.text)
-            long_polling_response_timestamp = jsonify_response.get('new_attempts')
+            jsonify_response = json.loads(long_polling_response_timestamp.text)
+            long_polling_response = jsonify_response.get('new_attempts')
 
-            for user_review in long_polling_response_timestamp:
+            for user_review in long_polling_response:
                 print(user_review)
 
             return user_reviews
