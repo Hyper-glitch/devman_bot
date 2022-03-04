@@ -1,6 +1,9 @@
 import json
+import os
 
 import requests
+
+from tg_bot import send_notification
 
 
 class ApiDevMan:
@@ -28,9 +31,10 @@ class ApiDevMan:
             try:
                 long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=90)
                 jsonify_response = json.loads(long_polling_response.text)
-                timestamp = jsonify_response.get('timestamp')
+                timestamp = jsonify_response.get('timestamp_to_request')
+
                 long_polling_response_timestamp = requests.get(url=long_polling_url, headers=self.header,
-                                                               timeout=10, params={'timestamp': timestamp},
+                                                               timeout=90, params={'timestamp': timestamp},
                                                                )
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 continue
@@ -41,10 +45,12 @@ class ApiDevMan:
             for user_review in long_polling_response:
                 print(user_review)
 
+            send_notification(your_name='Roman')
+
             return user_reviews
 
 
 if __name__ == '__main__':
-    api = ApiDevMan(token='***')
+    api = ApiDevMan(token=os.environ.get('DEVMAN_TOKEN'))
     user_reviews = api.get_user_reviews()
     long_polling = api.get_long_polling()
