@@ -25,13 +25,20 @@ class ApiDevMan:
     def get_long_polling(self):
         while True:
             long_polling_url = self.base_url + 'long_polling/'
-            long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=60)
-            long_polling_response.raise_for_status()
+            try:
+                long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=90)
+                jsonify_response = json.loads(long_polling_response.text)
+                timestamp = jsonify_response.get('timestamp')
+                long_polling_response_timestamp = requests.get(url=long_polling_url, headers=self.header,
+                                                               timeout=10, params={'timestamp': timestamp},
+                                                               )
+            except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+                continue
 
             jsonify_response = json.loads(long_polling_response.text)
-            long_polling = jsonify_response.get('results')
+            long_polling_response_timestamp = jsonify_response.get('new_attempts')
 
-            for user_review in long_polling:
+            for user_review in long_polling_response_timestamp:
                 print(user_review)
 
             return user_reviews
