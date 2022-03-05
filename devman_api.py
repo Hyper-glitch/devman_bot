@@ -42,14 +42,13 @@ class ApiDevMan:
             jsonify_response = json.loads(long_polling_response_timestamp.text)
             long_polling_response = jsonify_response.get('new_attempts')
 
-            for user_review in long_polling_response:
-                lesson_title = user_review.get('user_review')
-                lesson_url = user_review.get('lesson_url')
-                is_negative_result = user_review.get('is_negative')
+            lesson_title = long_polling_response[0].get('lesson_title')
+            lesson_url = long_polling_response[0].get('lesson_url')
+            is_negative_result = long_polling_response[0].get('is_negative')
 
-                send_notification(your_name='Roman', lesson_title=lesson_title,
-                                  lesson_url=lesson_url, is_negative_result=is_negative_result,
-                                  )
+            send_notification(your_name='Roman', lesson_title=lesson_title,
+                              lesson_url=lesson_url, is_negative_result=is_negative_result,
+                              )
 
             return user_reviews
 
