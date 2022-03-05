@@ -43,9 +43,13 @@ class ApiDevMan:
             long_polling_response = jsonify_response.get('new_attempts')
 
             for user_review in long_polling_response:
-                print(user_review)
+                lesson_title = user_review.get('user_review')
+                lesson_url = user_review.get('lesson_url')
+                is_negative_result = user_review.get('is_negative')
 
-            send_notification(your_name='Roman')
+                send_notification(your_name='Roman', lesson_title=lesson_title,
+                                  lesson_url=lesson_url, is_negative_result=is_negative_result,
+                                  )
 
             return user_reviews
 
