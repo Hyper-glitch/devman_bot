@@ -23,8 +23,6 @@ class ApiDevMan:
         for user_review in user_reviews:
             print(user_review)
 
-        return user_reviews
-
     def get_long_polling(self):
         while True:
             long_polling_url = self.base_url + 'long_polling/'
@@ -46,14 +44,12 @@ class ApiDevMan:
             lesson_url = long_polling_response[0].get('lesson_url')
             is_negative_result = long_polling_response[0].get('is_negative')
 
-            send_notification(your_name='Roman', lesson_title=lesson_title,
+            send_notification(your_name=os.environ.get('USERNAME'), lesson_title=lesson_title,
                               lesson_url=lesson_url, is_negative_result=is_negative_result,
                               )
-
-            return user_reviews
 
 
 if __name__ == '__main__':
     api = ApiDevMan(token=os.environ.get('DEVMAN_TOKEN'))
-    user_reviews = api.get_user_reviews()
-    long_polling = api.get_long_polling()
+    api.get_user_reviews()
+    api.get_long_polling()
