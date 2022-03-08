@@ -42,10 +42,10 @@ class ApiDevMan:
 
             lesson_title = long_polling_response[0].get('lesson_title')
             lesson_url = long_polling_response[0].get('lesson_url')
-            is_negative_result = long_polling_response[0].get('is_negative')
+            is_lesson_failed = long_polling_response[0].get('is_negative')
 
-            send_notification(your_name=os.environ.get('USERNAME'), lesson_title=lesson_title,
-                              lesson_url=lesson_url, is_negative_result=is_negative_result,
+            send_notification(username=os.environ.get('USERNAME'), lesson_title=lesson_title,
+                              lesson_url=lesson_url, is_lesson_failed=is_lesson_failed,
                               )
 
 
