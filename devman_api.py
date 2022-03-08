@@ -1,5 +1,6 @@
 import json
 import os
+from typing import List
 
 import requests
 
@@ -12,24 +13,24 @@ class ApiDevMan:
         self.token = token
         self.header = {'Authorization': 'Token ' + self.token}
 
-    def get_user_reviews(self):
+    def get_user_reviews(self) -> List:
         user_reviews_url = self.base_url + 'user_reviews/'
         user_reviews_response = requests.get(url=user_reviews_url, headers=self.header)
         user_reviews_response.raise_for_status()
 
-        jsonify_response = json.loads(user_reviews_response.text)
-        user_reviews = jsonify_response.get('results')
+        user_reviews_text = json.loads(user_reviews_response.text)
+        user_reviews = user_reviews_text.get('results')
 
-        for user_review in user_reviews:
-            print(user_review)
+        return user_reviews
 
     def get_long_polling(self):
+        long_polling_url = self.base_url + 'long_polling/'
+
         while True:
-            long_polling_url = self.base_url + 'long_polling/'
             try:
                 long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=90)
-                jsonify_response = json.loads(long_polling_response.text)
-                timestamp = jsonify_response.get('timestamp_to_request')
+                long_polling_text = json.loads(long_polling_response.text)
+                timestamp = long_polling_text.get('timestamp_to_request')
 
                 long_polling_response_timestamp = requests.get(url=long_polling_url, headers=self.header,
                                                                timeout=90, params={'timestamp': timestamp},
@@ -37,8 +38,8 @@ class ApiDevMan:
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 continue
 
-            jsonify_response = json.loads(long_polling_response_timestamp.text)
-            long_polling_response = jsonify_response.get('new_attempts')
+            long_polling_text = json.loads(long_polling_response_timestamp.text)
+            long_polling_response = long_polling_text.get('new_attempts')
 
             lesson_title = long_polling_response[0].get('lesson_title')
             lesson_url = long_polling_response[0].get('lesson_url')
@@ -51,5 +52,6 @@ class ApiDevMan:
 
 if __name__ == '__main__':
     api = ApiDevMan(token=os.environ.get('DEVMAN_TOKEN'))
-    api.get_user_reviews()
+    user_reviews = api.get_user_reviews()
+    print(user_reviews)
     api.get_long_polling()
