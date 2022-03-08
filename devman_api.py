@@ -3,6 +3,7 @@ import os
 from typing import List
 
 import requests
+import telegram
 
 from tg_bot import send_notification
 
@@ -23,14 +24,19 @@ class ApiDevMan:
 
         return user_reviews
 
-    def get_long_polling(self):
+    def get_long_polling(self, telegram_bot):
         long_polling_url = self.base_url + 'long_polling/'
 
         while True:
             try:
                 long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=90)
                 long_polling_text = json.loads(long_polling_response.text)
-                timestamp = long_polling_text.get('timestamp_to_request')
+
+                status = long_polling_text.get('status')
+                if status == 'timeout':
+                    timestamp = long_polling_text.get('timestamp_to_request')
+                else:
+                    timestamp = long_polling_text.get('last_attempt_timestamp')
 
                 long_polling_response_timestamp = requests.get(url=long_polling_url, headers=self.header,
                                                                timeout=90, params={'timestamp': timestamp},
@@ -46,12 +52,13 @@ class ApiDevMan:
             is_lesson_failed = long_polling_response[0].get('is_negative')
 
             send_notification(username=os.environ.get('USERNAME'), lesson_title=lesson_title,
-                              lesson_url=lesson_url, is_lesson_failed=is_lesson_failed,
+                              lesson_url=lesson_url, is_lesson_failed=is_lesson_failed, telegram_bot=telegram_bot
                               )
 
 
 if __name__ == '__main__':
     api = ApiDevMan(token=os.environ.get('DEVMAN_TOKEN'))
+    telegram_bot = telegram.Bot(token=os.environ.get('TG_TOKEN'))
     user_reviews = api.get_user_reviews()
     print(user_reviews)
-    api.get_long_polling()
+    api.get_long_polling(telegram_bot=telegram_bot)
