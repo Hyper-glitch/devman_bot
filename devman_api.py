@@ -9,9 +9,9 @@ from tg_bot import send_notification
 
 
 class ApiDevMan:
-    def __init__(self, token):
+    def __init__(self, devman_token):
         self.base_url = 'https://dvmn.org/api/'
-        self.token = token
+        self.token = devman_token
         self.header = {'Authorization': 'Token ' + self.token}
 
     def get_user_reviews(self) -> List:
@@ -24,7 +24,7 @@ class ApiDevMan:
 
         return user_reviews
 
-    def get_long_polling(self, telegram_bot):
+    def get_long_polling(self, telegram_bot, username, chat_id):
         long_polling_url = self.base_url + 'long_polling/'
 
         while True:
@@ -45,20 +45,27 @@ class ApiDevMan:
                 continue
 
             long_polling_text = json.loads(long_polling_response_timestamp.text)
-            long_polling_response = long_polling_text.get('new_attempts')
+            new_attempts = long_polling_text.get('new_attempts')
+            user_review = new_attempts[0]
 
-            lesson_title = long_polling_response[0].get('lesson_title')
-            lesson_url = long_polling_response[0].get('lesson_url')
-            is_lesson_failed = long_polling_response[0].get('is_negative')
+            lesson_title = user_review.get('lesson_title')
+            lesson_url = user_review.get('lesson_url')
+            is_lesson_failed = user_review.get('is_negative')
 
-            send_notification(username=os.environ.get('USERNAME'), lesson_title=lesson_title,
+            send_notification(username=username, lesson_title=lesson_title, chat_id=chat_id,
                               lesson_url=lesson_url, is_lesson_failed=is_lesson_failed, telegram_bot=telegram_bot
                               )
 
 
 if __name__ == '__main__':
-    api = ApiDevMan(token=os.environ.get('DEVMAN_TOKEN'))
-    telegram_bot = telegram.Bot(token=os.environ.get('TG_TOKEN'))
+    devman_token = os.environ.get('DEVMAN_TOKEN')
+    telegram_token = os.environ.get('TG_TOKEN')
+    username = os.environ.get('USERNAME')
+    chat_id = os.environ.get('CHAT_ID')
+
+    api = ApiDevMan(devman_token=devman_token)
+    telegram_bot = telegram.Bot(token=telegram_token)
+
     user_reviews = api.get_user_reviews()
     print(user_reviews)
-    api.get_long_polling(telegram_bot=telegram_bot)
+    api.get_long_polling(telegram_bot=telegram_bot, username=username, chat_id=chat_id)
