@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import List
 
 import requests
@@ -42,6 +43,7 @@ class ApiDevMan:
                                                                timeout=90, params={'timestamp': timestamp},
                                                                )
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+                time.sleep(180)
                 continue
 
             long_polling_text = json.loads(long_polling_response_timestamp.text)
