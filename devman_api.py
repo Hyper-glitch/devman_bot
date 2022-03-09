@@ -27,26 +27,30 @@ class ApiDevMan:
 
     def get_long_polling(self, telegram_bot, username, chat_id):
         long_polling_url = self.base_url + 'long_polling/'
+        params = None
 
         while True:
             try:
-                long_polling_response = requests.get(url=long_polling_url, headers=self.header, timeout=90)
+                long_polling_response = requests.get(url=long_polling_url, headers=self.header,
+                                                     timeout=90, params=params,
+                                                     )
                 long_polling_text = json.loads(long_polling_response.text)
 
                 status = long_polling_text.get('status')
+
                 if status == 'timeout':
                     timestamp = long_polling_text.get('timestamp_to_request')
+                    params = {'timestamp': timestamp}
+                    continue
                 else:
                     timestamp = long_polling_text.get('last_attempt_timestamp')
+                    params = {'timestamp': timestamp}
 
-                long_polling_response_timestamp = requests.get(url=long_polling_url, headers=self.header,
-                                                               timeout=90, params={'timestamp': timestamp},
-                                                               )
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 time.sleep(180)
                 continue
 
-            long_polling_text = json.loads(long_polling_response_timestamp.text)
+            long_polling_text = json.loads(long_polling_response.text)
             new_attempts = long_polling_text.get('new_attempts')
             user_review = new_attempts[0]
 
