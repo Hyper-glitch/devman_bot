@@ -1,4 +1,3 @@
-import json
 import os
 import time
 from typing import List
@@ -17,11 +16,9 @@ class ApiDevMan:
 
     def get_user_reviews(self) -> List:
         user_reviews_url = self.base_url + 'user_reviews/'
-        user_reviews_response = requests.get(url=user_reviews_url, headers=self.header)
-        user_reviews_response.raise_for_status()
-
-        user_reviews_text = json.loads(user_reviews_response.text)
-        user_reviews = user_reviews_text.get('results')
+        response = requests.get(url=user_reviews_url, headers=self.header)
+        response.raise_for_status()
+        user_reviews = response.json().get('results')
 
         return user_reviews
 
@@ -31,27 +28,24 @@ class ApiDevMan:
 
         while True:
             try:
-                long_polling_response = requests.get(url=long_polling_url, headers=self.header,
-                                                     timeout=90, params=params,
-                                                     )
-                long_polling_text = json.loads(long_polling_response.text)
+                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params,)
+                long_polling = response.json()
 
-                status = long_polling_text.get('status')
+                status = long_polling.get('status')
 
                 if status == 'timeout':
-                    timestamp = long_polling_text.get('timestamp_to_request')
+                    timestamp = long_polling.get('timestamp_to_request')
                     params = {'timestamp': timestamp}
                     continue
                 else:
-                    timestamp = long_polling_text.get('last_attempt_timestamp')
+                    timestamp = long_polling.get('last_attempt_timestamp')
                     params = {'timestamp': timestamp}
 
             except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 time.sleep(180)
                 continue
 
-            long_polling_text = json.loads(long_polling_response.text)
-            new_attempts = long_polling_text.get('new_attempts')
+            new_attempts = long_polling.get('new_attempts')
             user_review = new_attempts[0]
 
             lesson_title = user_review.get('lesson_title')
