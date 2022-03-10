@@ -71,3 +71,4 @@ if __name__ == '__main__':
     user_reviews = api.get_user_reviews()
     print(user_reviews)
     api.get_long_polling(telegram_bot=telegram_bot, username=username, chat_id=chat_id)
+
