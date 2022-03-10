@@ -28,7 +28,7 @@ class ApiDevMan:
 
         while True:
             try:
-                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params,)
+                response = requests.get(url=long_polling_url, headers=self.header, timeout=2, params=params,)
                 long_polling = response.json()
 
                 status = long_polling.get('status')
@@ -41,7 +41,9 @@ class ApiDevMan:
                     timestamp = long_polling.get('last_attempt_timestamp')
                     params = {'timestamp': timestamp}
 
-            except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+            except requests.exceptions.ReadTimeout:
+                continue
+            except requests.exceptions.ConnectionError:
                 time.sleep(180)
                 continue
 
