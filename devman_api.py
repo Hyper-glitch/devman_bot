@@ -1,10 +1,11 @@
-import os
 import time
 from typing import List
+import logging
 
 import requests
 import telegram
 
+from bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
 from tg_bot import send_notification
 
 
@@ -59,15 +60,16 @@ class ApiDevMan:
                               )
 
 
-if __name__ == '__main__':
-    devman_token = os.environ.get('DEVMAN_TOKEN')
-    telegram_token = os.environ.get('TG_TOKEN')
-    username = os.environ.get('USERNAME')
-    chat_id = os.environ.get('CHAT_ID')
-
-    api = ApiDevMan(devman_token=devman_token)
-    telegram_bot = telegram.Bot(token=telegram_token)
+def main():
+    logging.info('Bot is running')
+    api = ApiDevMan(devman_token=DEVMAN_TOKEN)
+    telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
     user_reviews = api.get_user_reviews()
     print(user_reviews)
-    api.get_long_polling(telegram_bot=telegram_bot, username=username, chat_id=chat_id)
+    api.get_long_polling(telegram_bot=telegram_bot, username=USERNAME, chat_id=CHAT_ID)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(filename)s %(levelname)s %(message)s")
+    main()
