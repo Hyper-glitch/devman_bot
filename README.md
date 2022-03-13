@@ -1,5 +1,5 @@
 # devman_bot
-This bot send requests to DevMan API and then sends notification when one of the work will check
+This bot send requests to DevMan API and then sends notification to telegram bot, when one of the work is checked.
 
 How to run:
 1. git clone https://github.com/Hyper-glitch/devman_bot.git
