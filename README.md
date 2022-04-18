@@ -1,6 +1,4 @@
 # devman_bot
-This bot send requests to DevMan API and then sends notification to telegram bot, when one of the work is checked.
-
 ---
 
 ## Basic information
