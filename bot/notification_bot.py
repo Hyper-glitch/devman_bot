@@ -2,8 +2,8 @@ import logging
 
 import telegram
 
-from bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
-from devman_api import ApiDevMan
+from bot.bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
+from bot.devman_api import ApiDevMan
 from tg_bot import TelegramLogsHandler
 
 logger = logging.getLogger('devman_bot')
