@@ -1,7 +1,6 @@
 import logging
 
 import telegram
-from dotenv import load_dotenv
 
 from bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
 from devman_api import ApiDevMan
@@ -10,7 +9,6 @@ from utils import TelegramLogsHandler
 
 def main():
     logger.info('Bot is running')
-    load_dotenv()
     logger_format = '%(asctime)s %(filename)s %(levelname)s %(message)s'
 
     telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
