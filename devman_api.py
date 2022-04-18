@@ -1,15 +1,15 @@
-import time
-from typing import List
 import logging
+import time
+import urllib.parse as urllib
+from typing import List
 
 import requests
 import telegram
+from dotenv import load_dotenv
 
 from bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
 from tg_bot import send_notification
 from utils import TelegramLogsHandler
-
-logger = logging.getLogger('devman_bot')
 
 
 class ApiDevMan:
@@ -19,20 +19,21 @@ class ApiDevMan:
         self.header = {'Authorization': 'Token ' + self.token}
 
     def get_user_reviews(self) -> List:
-        user_reviews_url = self.base_url + 'user_reviews/'
+        endpoint = 'user_reviews/'
+        user_reviews_url = urllib.urljoin(self.base_url, endpoint)
         response = requests.get(url=user_reviews_url, headers=self.header)
         response.raise_for_status()
         user_reviews = response.json().get('results')
-
         return user_reviews
 
     def get_long_polling(self, telegram_bot, username, chat_id):
-        long_polling_url = self.base_url + 'long_polling/'
+        endpoint = 'long_polling/'
+        long_polling_url = urllib.urljoin(self.base_url, endpoint)
         params = None
 
         while True:
             try:
-                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params,)
+                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params, )
                 long_polling = response.json()
 
                 status = long_polling.get('status')
@@ -58,22 +59,26 @@ class ApiDevMan:
             lesson_url = user_review.get('lesson_url')
             is_lesson_failed = user_review.get('is_negative')
 
-            send_notification(username=username, lesson_title=lesson_title, chat_id=chat_id,
-                              lesson_url=lesson_url, is_lesson_failed=is_lesson_failed, telegram_bot=telegram_bot
-                              )
+            send_notification(
+                username=username, lesson_title=lesson_title, chat_id=chat_id,
+                lesson_url=lesson_url, is_lesson_failed=is_lesson_failed, telegram_bot=telegram_bot,
+            )
 
 
-def main(telegram_bot):
+def main():
     logger.info('Bot is running')
+    load_dotenv()
+    logger_format = '%(asctime)s %(filename)s %(levelname)s %(message)s'
+
+    telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    set_up_logger(telegram_bot=telegram_bot, chat_id=CHAT_ID, logger_format=logger_format)
     api = ApiDevMan(devman_token=DEVMAN_TOKEN)
 
-    user_reviews = api.get_user_reviews()
-    print(user_reviews)
     api.get_long_polling(telegram_bot=telegram_bot, username=USERNAME, chat_id=CHAT_ID)
 
 
-def set_up_logger(telegram_bot, chat_id):
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(filename)s %(levelname)s %(message)s")
+def set_up_logger(telegram_bot, chat_id, logger_format):
+    logging.basicConfig(level=logging.INFO, format=logger_format)
 
     tg_handler = TelegramLogsHandler(telegram_bot, chat_id)
     logger.setLevel(logging.INFO)
@@ -81,7 +86,5 @@ def set_up_logger(telegram_bot, chat_id):
 
 
 if __name__ == '__main__':
-    telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
-
-    set_up_logger(telegram_bot=telegram_bot, chat_id=CHAT_ID)
-    main(telegram_bot)
+    logger = logging.getLogger('devman_bot')
+    main()
