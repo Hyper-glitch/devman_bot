@@ -1,15 +1,10 @@
-import logging
 import time
 import urllib.parse as urllib
 from typing import List
 
 import requests
-import telegram
-from dotenv import load_dotenv
 
-from bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
 from tg_bot import send_notification
-from utils import TelegramLogsHandler
 
 
 class ApiDevMan:
@@ -33,7 +28,7 @@ class ApiDevMan:
 
         while True:
             try:
-                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params, )
+                response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params)
                 long_polling = response.json()
 
                 status = long_polling.get('status')
@@ -63,28 +58,3 @@ class ApiDevMan:
                 username=username, lesson_title=lesson_title, chat_id=chat_id,
                 lesson_url=lesson_url, is_lesson_failed=is_lesson_failed, telegram_bot=telegram_bot,
             )
-
-
-def main():
-    logger.info('Bot is running')
-    load_dotenv()
-    logger_format = '%(asctime)s %(filename)s %(levelname)s %(message)s'
-
-    telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    set_up_logger(telegram_bot=telegram_bot, chat_id=CHAT_ID, logger_format=logger_format)
-    api = ApiDevMan(devman_token=DEVMAN_TOKEN)
-
-    api.get_long_polling(telegram_bot=telegram_bot, username=USERNAME, chat_id=CHAT_ID)
-
-
-def set_up_logger(telegram_bot, chat_id, logger_format):
-    logging.basicConfig(level=logging.INFO, format=logger_format)
-
-    tg_handler = TelegramLogsHandler(telegram_bot, chat_id)
-    logger.setLevel(logging.INFO)
-    logger.addHandler(tg_handler)
-
-
-if __name__ == '__main__':
-    logger = logging.getLogger('devman_bot')
-    main()
