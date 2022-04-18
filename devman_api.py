@@ -1,10 +1,15 @@
+import logging
 import time
 import urllib.parse as urllib
 from typing import List
 
 import requests
+from requests.exceptions import ConnectionError, HTTPError, ReadTimeout
 
+from bot_settings import NO_NEW_INFO_LOGG, LONG_POLLING_TIMEOUT, LOST_CONNECTION_WARNING_LOGG, ERROR_LOGG_MESSAGE
 from tg_bot import send_notification
+
+logger = logging.getLogger('devman_bot')
 
 
 class ApiDevMan:
@@ -29,23 +34,27 @@ class ApiDevMan:
         while True:
             try:
                 response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params)
-                long_polling = response.json()
-
-                status = long_polling.get('status')
-
-                if status == 'timeout':
-                    timestamp = long_polling.get('timestamp_to_request')
-                    params = {'timestamp': timestamp}
-                    continue
-                else:
-                    timestamp = long_polling.get('last_attempt_timestamp')
-                    params = {'timestamp': timestamp}
-
-            except requests.exceptions.ReadTimeout:
+            except ReadTimeout:
+                logger.info(NO_NEW_INFO_LOGG)
                 continue
-            except requests.exceptions.ConnectionError:
-                time.sleep(180)
+            except ConnectionError:
+                logger.warning(LOST_CONNECTION_WARNING_LOGG)
+                time.sleep(LONG_POLLING_TIMEOUT)
                 continue
+            except HTTPError as error:
+                logger.error(ERROR_LOGG_MESSAGE)
+                logger.exception(error)
+
+            long_polling = response.json()
+            status = long_polling.get('status')
+
+            if status == 'timeout':
+                timestamp = long_polling.get('timestamp_to_request')
+                params = {'timestamp': timestamp}
+                continue
+            else:
+                timestamp = long_polling.get('last_attempt_timestamp')
+                params = {'timestamp': timestamp}
 
             new_attempts = long_polling.get('new_attempts')
             user_review = new_attempts[0]
