@@ -6,7 +6,7 @@ from typing import List
 import requests
 from requests.exceptions import ConnectionError, HTTPError, ReadTimeout
 
-from bot_settings import NO_NEW_INFO_LOGG, LONG_POLLING_TIMEOUT, LOST_CONNECTION_WARNING_LOGG, ERROR_LOGG_MESSAGE
+from constants import NO_NEW_INFO_LOGG, LONG_POLLING_TIMEOUT, LOST_CONNECTION_WARNING_LOGG, ERROR_LOGG_MESSAGE
 from tg_bot import send_notification
 
 logger = logging.getLogger('devman_bot')
@@ -27,6 +27,8 @@ class ApiDevMan:
         return user_reviews
 
     def get_long_polling(self, telegram_bot, username, chat_id):
+        logger.info('Start long polling')
+
         endpoint = 'long_polling/'
         long_polling_url = urllib.urljoin(self.base_url, endpoint)
         params = None
@@ -44,6 +46,7 @@ class ApiDevMan:
             except HTTPError as error:
                 logger.error(ERROR_LOGG_MESSAGE)
                 logger.exception(error)
+                continue
 
             long_polling = response.json()
             status = long_polling.get('status')
