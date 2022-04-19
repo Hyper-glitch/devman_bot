@@ -1,6 +1,6 @@
 import logging
 
-from bot.constants import SUCCESSFUL_REVIEW_TEXT, FAILED_REVIEW_TEXT
+from constants import SUCCESSFUL_REVIEW_TEXT, FAILED_REVIEW_TEXT
 
 
 def send_notification(username, lesson_title, is_lesson_failed, lesson_url, telegram_bot, chat_id):
