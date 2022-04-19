@@ -48,18 +48,18 @@ class ApiDevMan:
                 logger.exception(error)
                 continue
 
-            long_polling = response.json()
-            status = long_polling.get('status')
+            reviews = response.json()
+            status = reviews.get('status')
 
             if status == 'timeout':
-                timestamp = long_polling.get('timestamp_to_request')
+                timestamp = reviews.get('timestamp_to_request')
                 params = {'timestamp': timestamp}
                 continue
             else:
-                timestamp = long_polling.get('last_attempt_timestamp')
+                timestamp = reviews.get('last_attempt_timestamp')
                 params = {'timestamp': timestamp}
 
-            new_attempts = long_polling.get('new_attempts')
+            new_attempts = reviews.get('new_attempts')
             user_review = new_attempts[0]
 
             lesson_title = user_review.get('lesson_title')
