@@ -1,32 +1,32 @@
 import logging
+import os
 
 import telegram
+from dotenv import load_dotenv
 
-from bot.bot_settings import DEVMAN_TOKEN, TELEGRAM_TOKEN, USERNAME, CHAT_ID
 from bot.devman_api import ApiDevMan
 from tg_bot import TelegramLogsHandler
 
-logger = logging.getLogger('devman_bot')
 
-
-def main(telegram_bot):
+def main():
+    logger = logging.getLogger('devman_bot')
     logger.info('Bot is running')
-    api = ApiDevMan(devman_token=DEVMAN_TOKEN)
-
-    api.get_long_polling(telegram_bot=telegram_bot, username=USERNAME, chat_id=CHAT_ID)
-
-
-def set_up_logger(telegram_bot, chat_id):
     logger_format = '%(asctime)s %(filename)s %(levelname)s %(message)s'
     logging.basicConfig(level=logging.INFO, format=logger_format)
 
-    tg_handler = TelegramLogsHandler(telegram_bot, chat_id)
+    load_dotenv()
+    devman_token = os.getenv('DEVMAN_TOKEN')
+    telegram_token = os.getenv('TG_TOKEN')
+    username = os.getenv('USERNAME')
+    chat_id = os.getenv('CHAT_ID')
 
-    logger.setLevel(logging.INFO)
+    api = ApiDevMan(devman_token=devman_token)
+    telegram_bot = telegram.Bot(token=telegram_token)
+    tg_handler = TelegramLogsHandler(telegram_bot, chat_id)
     logger.addHandler(tg_handler)
+
+    api.get_long_polling(telegram_bot=telegram_bot, username=username, chat_id=chat_id)
 
 
 if __name__ == '__main__':
-    telegram_bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    set_up_logger(telegram_bot=telegram_bot, chat_id=CHAT_ID)
-    main(telegram_bot=telegram_bot)
+    main()
