@@ -4,15 +4,15 @@ import os
 import telegram
 from dotenv import load_dotenv
 
-from bot.devman_api import ApiDevMan
+from devman_api import ApiDevMan
 from tg_bot import TelegramLogsHandler
 
 
 def main():
     logger = logging.getLogger('devman_bot')
-    logger.info('Bot is running')
     logger_format = '%(asctime)s %(filename)s %(levelname)s %(message)s'
     logging.basicConfig(level=logging.INFO, format=logger_format)
+    logger.info('Bot is running')
 
     load_dotenv()
     devman_token = os.getenv('DEVMAN_TOKEN')
