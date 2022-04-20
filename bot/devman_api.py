@@ -36,6 +36,7 @@ class ApiDevMan:
         while True:
             try:
                 response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params)
+                response.raise_for_status()
             except ReadTimeout:
                 logger.info(NO_NEW_INFO_LOGG)
                 continue
@@ -49,6 +50,10 @@ class ApiDevMan:
                 continue
 
             reviews = response.json()
+            if 'error' in reviews:
+                logger.error(ERROR_LOGG_MESSAGE)
+                raise HTTPError(reviews['error'])
+
             status = reviews.get('status')
 
             if status == 'timeout':
