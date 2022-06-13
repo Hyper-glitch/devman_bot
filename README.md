@@ -22,11 +22,11 @@ Create **.env** file and set the <ins>following environmental variables</ins>:
 | `CHAT_ID`          | your chat id from @userinfobot                        |
 | `USERNAME`         | your name                                             |
 
-Runs with a docker container with the following commands:
+Run with a docker container with the following commands:
 ```bash
 docker build -t devman_bot . && docker run --env-file .env devman_bot
 ```
-Runs without a container
+Run without a container
 
 1. clone the repository:
 ```bash
