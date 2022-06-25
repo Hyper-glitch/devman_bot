@@ -3,4 +3,4 @@ WORKDIR /devman_bot
 COPY requirements.txt .
 RUN apk update && pip install -r requirements.txt
 COPY . .
-CMD ["python", "devman_api.py"]
+CMD ["python", "bot/main.py"]
