@@ -6,7 +6,7 @@ from typing import List
 import requests
 from requests.exceptions import ConnectionError, HTTPError, ReadTimeout
 
-from constants import NO_NEW_INFO_LOGG, LONG_POLLING_TIMEOUT, LOST_CONNECTION_WARNING_LOGG, ERROR_LOGG_MESSAGE
+from constants import LONG_POLLING_TIMEOUT, LOST_CONNECTION_WARNING_LOGG, ERROR_LOGG_MESSAGE
 from tg_bot import send_notification
 
 logger = logging.getLogger('devman_bot')
@@ -38,7 +38,6 @@ class ApiDevMan:
                 response = requests.get(url=long_polling_url, headers=self.header, timeout=90, params=params)
                 response.raise_for_status()
             except ReadTimeout:
-                logger.info(NO_NEW_INFO_LOGG)
                 continue
             except ConnectionError:
                 logger.warning(LOST_CONNECTION_WARNING_LOGG)
